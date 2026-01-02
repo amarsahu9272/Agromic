@@ -137,6 +137,26 @@ const Home: React.FC = () => {
         </div>
       </section>
 
+      {/* Interactive Savings Callout */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-gradient-to-br from-emerald-600 to-emerald-800 rounded-[3rem] p-10 md:p-16 flex flex-col md:flex-row items-center gap-10 shadow-2xl">
+          <div className="md:w-2/3 space-y-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-white font-serif">How much could you save?</h2>
+            <p className="text-emerald-100 text-lg font-light leading-relaxed">
+              Use our interactive calculator to see how much water, fertilizer, and labor costs you can reduce by switching to Agromic precision irrigation.
+            </p>
+          </div>
+          <div className="md:w-1/3 w-full flex justify-center">
+            <Link 
+              to="/impact" 
+              className="w-full text-center bg-white text-emerald-800 px-8 py-5 rounded-2xl font-bold hover:bg-emerald-50 transition-all shadow-xl hover:-translate-y-1 active:translate-y-0"
+            >
+              Calculate My Savings
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Product Highlight */}
       <section className="bg-stone-900 py-24 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -173,30 +193,6 @@ const Home: React.FC = () => {
               />
               <div className="absolute -top-10 -right-10 w-64 h-64 bg-emerald-600/20 rounded-full blur-3xl z-0"></div>
               <div className="absolute -bottom-10 -left-10 w-64 h-64 bg-amber-600/10 rounded-full blur-3xl z-0"></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Impact Stats */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-emerald-700 rounded-[3rem] p-12 md:p-20 text-center text-white relative overflow-hidden">
-          <div className="relative z-10 grid grid-cols-2 md:grid-cols-4 gap-8">
-            <div>
-              <div className="text-4xl md:text-6xl font-bold mb-2">10M+</div>
-              <div className="text-emerald-100 text-sm md:text-base font-medium">Liters of Water Saved</div>
-            </div>
-            <div>
-              <div className="text-4xl md:text-6xl font-bold mb-2">500+</div>
-              <div className="text-emerald-100 text-sm md:text-base font-medium">Farms Optimized</div>
-            </div>
-            <div>
-              <div className="text-4xl md:text-6xl font-bold mb-2">40%</div>
-              <div className="text-emerald-100 text-sm md:text-base font-medium">Reduced Labor Costs</div>
-            </div>
-            <div>
-              <div className="text-4xl md:text-6xl font-bold mb-2">2x</div>
-              <div className="text-emerald-100 text-sm md:text-base font-medium">Crop Quality Grade</div>
             </div>
           </div>
         </div>

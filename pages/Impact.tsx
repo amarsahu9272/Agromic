@@ -1,6 +1,106 @@
 
-import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import React, { useState, useMemo } from 'react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+
+const SavingsCalculator: React.FC = () => {
+  const [landSize, setLandSize] = useState<number>(5);
+  const [unit, setUnit] = useState<'Acres' | 'Hectares'>('Acres');
+  const [method, setMethod] = useState<'Flood' | 'Manual'>('Flood');
+
+  const stats = useMemo(() => {
+    const sizeMultiplier = unit === 'Hectares' ? 2.47 : 1;
+    const baseWaterUsage = method === 'Flood' ? 1000000 : 600000; // liters per season per acre
+    
+    const traditionalWater = baseWaterUsage * landSize * sizeMultiplier;
+    const agromicWater = traditionalWater * 0.1; // 90% savings
+    const waterSaved = traditionalWater - agromicWater;
+    
+    const fertilizerSaved = landSize * sizeMultiplier * 45; // kg saved
+    const laborSaved = landSize * sizeMultiplier * 120; // hours saved per season
+
+    return {
+      water: waterSaved.toLocaleString(),
+      fertilizer: Math.round(fertilizerSaved).toLocaleString(),
+      labor: Math.round(laborSaved).toLocaleString()
+    };
+  }, [landSize, unit, method]);
+
+  return (
+    <div className="bg-white rounded-[3rem] shadow-2xl border border-stone-100 overflow-hidden">
+      <div className="p-8 md:p-12 bg-emerald-900 text-white">
+        <h3 className="text-2xl font-bold font-serif mb-2">Project Your Savings</h3>
+        <p className="text-emerald-200 text-sm">Input your farm details to see the Agromic difference.</p>
+      </div>
+      
+      <div className="p-8 md:p-12 space-y-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="space-y-3">
+            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Land Area</label>
+            <div className="flex">
+              <input 
+                type="number" 
+                value={landSize}
+                onChange={(e) => setLandSize(Math.max(0, Number(e.target.value)))}
+                className="w-full bg-stone-50 border border-stone-200 rounded-l-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-bold"
+              />
+              <select 
+                value={unit}
+                onChange={(e) => setUnit(e.target.value as any)}
+                className="bg-stone-100 border border-l-0 border-stone-200 rounded-r-xl px-3 py-3 text-xs font-bold text-slate-600 focus:outline-none"
+              >
+                <option>Acres</option>
+                <option>Hectares</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Current Method</label>
+            <select 
+              value={method}
+              onChange={(e) => setMethod(e.target.value as any)}
+              className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium appearance-none cursor-pointer"
+            >
+              <option value="Flood">Flood Irrigation</option>
+              <option value="Manual">Manual Sprinklers</option>
+            </select>
+          </div>
+
+          <div className="flex items-end pb-1">
+             <div className="text-[10px] text-slate-400 leading-tight italic">
+               *Calculations based on average regional benchmarks for seasonal row crops.
+             </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6">
+          <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100 text-center">
+            <div className="text-blue-600 text-2xl mb-1">💧</div>
+            <div className="text-3xl font-bold text-slate-900">{stats.water}L</div>
+            <div className="text-xs font-bold text-blue-700 uppercase tracking-tighter mt-1">Water Saved / Season</div>
+          </div>
+          <div className="bg-emerald-50 p-6 rounded-2xl border border-emerald-100 text-center">
+            <div className="text-emerald-600 text-2xl mb-1">🌱</div>
+            <div className="text-3xl font-bold text-slate-900">{stats.fertilizer}kg</div>
+            <div className="text-xs font-bold text-emerald-700 uppercase tracking-tighter mt-1">Fertilizer Saved</div>
+          </div>
+          <div className="bg-amber-50 p-6 rounded-2xl border border-amber-100 text-center">
+            <div className="text-amber-600 text-2xl mb-1">⏱️</div>
+            <div className="text-3xl font-bold text-slate-900">{stats.labor}h</div>
+            <div className="text-xs font-bold text-amber-700 uppercase tracking-tighter mt-1">Labor Hours Reduced</div>
+          </div>
+        </div>
+
+        <div className="pt-8 border-t border-stone-100 text-center">
+          <p className="text-slate-500 text-sm mb-6 italic">Ready to make these savings a reality for your land?</p>
+          <a href="#/contact" className="inline-block bg-emerald-600 text-white px-10 py-4 rounded-xl font-bold hover:bg-emerald-700 transition-all shadow-lg hover:shadow-emerald-500/20">
+            Request a Custom Design Plan
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const Impact: React.FC = () => {
   const data = [
@@ -21,7 +121,7 @@ const Impact: React.FC = () => {
       </section>
 
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center mb-32">
           <div className="space-y-8">
             <h2 className="text-3xl font-bold font-serif">Environmental Stewardship</h2>
             <p className="text-slate-600 leading-relaxed">
@@ -55,6 +155,15 @@ const Impact: React.FC = () => {
             </div>
             <p className="text-xs text-center text-slate-400 mt-4 italic">Comparison based on standard field trials for tomato cultivation.</p>
           </div>
+        </div>
+
+        {/* Interactive Savings Tool */}
+        <div className="mb-32">
+          <div className="text-center mb-12 space-y-4">
+            <h2 className="text-3xl font-bold font-serif text-slate-900">Personalized Savings Estimator</h2>
+            <p className="text-slate-600">Discover the potential for your specific agricultural operation.</p>
+          </div>
+          <SavingsCalculator />
         </div>
       </section>
 

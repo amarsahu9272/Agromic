@@ -10,6 +10,7 @@ import HowItWorks from './pages/HowItWorks';
 import Impact from './pages/Impact';
 import Contact from './pages/Contact';
 import AgroBot from './components/AgroBot';
+import ScrollToTopButton from './components/ScrollToTopButton';
 
 const App: React.FC = () => {
   return (
@@ -29,6 +30,7 @@ const App: React.FC = () => {
         </main>
         <Footer />
         <AgroBot />
+        <ScrollToTopButton />
       </div>
     </HashRouter>
   );
