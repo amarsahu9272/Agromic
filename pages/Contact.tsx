@@ -1,14 +1,127 @@
 
 import React, { useState } from 'react';
 
-const Contact: React.FC = () => {
-  const [submitted, setSubmitted] = useState(false);
+interface FormState {
+  fullName: string;
+  email: string;
+  phone: string;
+  inquiryType: string;
+  cropType: string;
+  farmSize: string;
+  message: string;
+  hp_field: string; // Honeypot field for spam prevention
+}
 
-  const handleSubmit = (e: React.FormEvent) => {
+interface FormErrors {
+  fullName?: string;
+  email?: string;
+  phone?: string;
+  inquiryType?: string;
+  message?: string;
+}
+
+const Contact: React.FC = () => {
+  const [formData, setFormData] = useState<FormState>({
+    fullName: '',
+    email: '',
+    phone: '',
+    inquiryType: '',
+    cropType: 'Orchards / Fruit Trees',
+    farmSize: '',
+    message: '',
+    hp_field: '',
+  });
+
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const validate = (): boolean => {
+    const newErrors: FormErrors = {};
+
+    if (!formData.fullName.trim()) {
+      newErrors.fullName = 'Full name is required';
+    } else if (formData.fullName.length < 3) {
+      newErrors.fullName = 'Name must be at least 3 characters';
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email address is required';
+    } else if (!emailRegex.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+
+    const phoneRegex = /^[0-9+\s-]{10,15}$/;
+    if (!formData.phone.trim()) {
+      newErrors.phone = 'Phone number is required';
+    } else if (!phoneRegex.test(formData.phone)) {
+      newErrors.phone = 'Please enter a valid phone number';
+    }
+
+    if (!formData.inquiryType) {
+      newErrors.inquiryType = 'Please select an inquiry type';
+    }
+
+    if (formData.message.trim().length > 0 && formData.message.length < 10) {
+      newErrors.message = 'Message must be at least 10 characters';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    // Clear error when user starts typing
+    if (errors[name as keyof FormErrors]) {
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    // Simulate API call
-    setTimeout(() => setSubmitted(false), 5000);
+
+    // 1. Basic Spam Prevention (Honeypot)
+    if (formData.hp_field) {
+      console.warn("Spam detected via honeypot.");
+      return; 
+    }
+
+    // 2. Client-side Validation
+    if (!validate()) return;
+
+    setIsSubmitting(true);
+
+    try {
+      // Simulate "Server-side" validation and API call
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      
+      // Simulate a server-side logic check
+      if (formData.email.includes("test@spam.com")) {
+        throw new Error("This email is blacklisted.");
+      }
+
+      setSubmitted(true);
+      setFormData({
+        fullName: '',
+        email: '',
+        phone: '',
+        inquiryType: '',
+        cropType: 'Orchards / Fruit Trees',
+        farmSize: '',
+        message: '',
+        hp_field: '',
+      });
+      
+      // Reset success message after 5 seconds
+      setTimeout(() => setSubmitted(false), 5000);
+    } catch (err: any) {
+      alert(err.message || "An error occurred. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -62,7 +175,7 @@ const Contact: React.FC = () => {
 
             {/* Map Placeholder */}
             <div className="aspect-video bg-stone-200 rounded-3xl overflow-hidden grayscale relative">
-               <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&q=80&w=1000" className="w-full h-full object-cover opacity-50" />
+               <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&q=80&w=1000" className="w-full h-full object-cover opacity-50" alt="Map background" />
                <div className="absolute inset-0 flex items-center justify-center">
                   <div className="bg-white px-6 py-3 rounded-full shadow-lg font-bold text-slate-800">Agromic Hub Location</div>
                </div>
@@ -83,52 +196,137 @@ const Contact: React.FC = () => {
                 <p className="text-emerald-700">One of our consultants will reach out to you within 24 hours.</p>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+                {/* Honeypot field - Hidden from users */}
+                <div className="hidden">
+                  <input 
+                    type="text" 
+                    name="hp_field" 
+                    value={formData.hp_field} 
+                    onChange={handleChange} 
+                    tabIndex={-1} 
+                    autoComplete="off" 
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700 ml-1">Full Name</label>
+                  <input 
+                    type="text" 
+                    name="fullName"
+                    value={formData.fullName}
+                    onChange={handleChange}
+                    required 
+                    placeholder="John Doe" 
+                    className={`w-full bg-stone-50 border ${errors.fullName ? 'border-red-400 ring-1 ring-red-400' : 'border-stone-200'} rounded-2xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all`} 
+                  />
+                  {errors.fullName && <p className="text-xs text-red-500 ml-1">{errors.fullName}</p>}
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="text-sm font-semibold text-slate-700 ml-1">Full Name</label>
-                    <input type="text" required placeholder="John Doe" className="w-full bg-stone-50 border border-stone-200 rounded-2xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all" />
+                    <label className="text-sm font-semibold text-slate-700 ml-1">Email Address</label>
+                    <input 
+                      type="email" 
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      required 
+                      placeholder="john@example.com" 
+                      className={`w-full bg-stone-50 border ${errors.email ? 'border-red-400 ring-1 ring-red-400' : 'border-stone-200'} rounded-2xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all`} 
+                    />
+                    {errors.email && <p className="text-xs text-red-500 ml-1">{errors.email}</p>}
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-slate-700 ml-1">Phone Number</label>
-                    <input type="tel" required placeholder="+91 ..." className="w-full bg-stone-50 border border-stone-200 rounded-2xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all" />
+                    <input 
+                      type="tel" 
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      required 
+                      placeholder="+91 00000 00000" 
+                      className={`w-full bg-stone-50 border ${errors.phone ? 'border-red-400 ring-1 ring-red-400' : 'border-stone-200'} rounded-2xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all`} 
+                    />
+                    {errors.phone && <p className="text-xs text-red-500 ml-1">{errors.phone}</p>}
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-slate-700 ml-1">Inquiry Type</label>
-                  <select required className="w-full bg-stone-50 border border-stone-200 rounded-2xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all appearance-none cursor-pointer">
-                    <option value="" disabled selected>Select inquiry type</option>
-                    <option>Product Information</option>
-                    <option>Distributor Inquiry</option>
-                    <option>Support Request</option>
+                  <select 
+                    name="inquiryType"
+                    value={formData.inquiryType}
+                    onChange={handleChange}
+                    required 
+                    className={`w-full bg-stone-50 border ${errors.inquiryType ? 'border-red-400 ring-1 ring-red-400' : 'border-stone-200'} rounded-2xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all appearance-none cursor-pointer`}
+                  >
+                    <option value="" disabled>Select inquiry type</option>
+                    <option value="Product Information">Product Information</option>
+                    <option value="Distributor Inquiry">Distributor Inquiry</option>
+                    <option value="Support Request">Support Request</option>
                   </select>
+                  {errors.inquiryType && <p className="text-xs text-red-500 ml-1">{errors.inquiryType}</p>}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-slate-700 ml-1">Crop Type</label>
-                    <select className="w-full bg-stone-50 border border-stone-200 rounded-2xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all appearance-none cursor-pointer">
-                      <option>Orchards / Fruit Trees</option>
-                      <option>Row Crops (Vegetables)</option>
-                      <option>Greenhouse / Nursery</option>
-                      <option>Cereals / Grains</option>
-                      <option>Other</option>
+                    <select 
+                      name="cropType"
+                      value={formData.cropType}
+                      onChange={handleChange}
+                      className="w-full bg-stone-50 border border-stone-200 rounded-2xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all appearance-none cursor-pointer"
+                    >
+                      <option value="Orchards / Fruit Trees">Orchards / Fruit Trees</option>
+                      <option value="Row Crops (Vegetables)">Row Crops (Vegetables)</option>
+                      <option value="Greenhouse / Nursery">Greenhouse / Nursery</option>
+                      <option value="Cereals / Grains">Cereals / Grains</option>
+                      <option value="Other">Other</option>
                     </select>
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-slate-700 ml-1">Farm Size <span className="text-slate-400 font-normal">(Optional)</span></label>
-                    <input type="text" placeholder="e.g. 5 Acres" className="w-full bg-stone-50 border border-stone-200 rounded-2xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all" />
+                    <input 
+                      type="text" 
+                      name="farmSize"
+                      value={formData.farmSize}
+                      onChange={handleChange}
+                      placeholder="e.g. 5 Acres" 
+                      className="w-full bg-stone-50 border border-stone-200 rounded-2xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all" 
+                    />
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-slate-700 ml-1">Message</label>
-                  <textarea rows={4} placeholder="Tell us about your land and irrigation needs..." className="w-full bg-stone-50 border border-stone-200 rounded-2xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"></textarea>
+                  <textarea 
+                    name="message"
+                    value={formData.message}
+                    onChange={handleChange}
+                    rows={4} 
+                    placeholder="Tell us about your land and irrigation needs..." 
+                    className={`w-full bg-stone-50 border ${errors.message ? 'border-red-400 ring-1 ring-red-400' : 'border-stone-200'} rounded-2xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all`}
+                  ></textarea>
+                  {errors.message && <p className="text-xs text-red-500 ml-1">{errors.message}</p>}
                 </div>
 
-                <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-5 rounded-2xl shadow-lg transition-all transform hover:-translate-y-1 active:scale-95">
-                  Send Inquiry
+                <button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className={`w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-5 rounded-2xl shadow-lg transition-all transform hover:-translate-y-1 active:scale-95 flex items-center justify-center space-x-2 ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span>Processing...</span>
+                    </>
+                  ) : (
+                    <span>Send Inquiry</span>
+                  )}
                 </button>
               </form>
             )}
