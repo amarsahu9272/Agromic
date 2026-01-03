@@ -6,10 +6,8 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   define: {
-    // This ensures that process.env.API_KEY is available even in the browser
-    'process.env': {
-      API_KEY: process.env.API_KEY
-    }
+    // This ensures that process.env.API_KEY is replaced with its string representation
+    'process.env.API_KEY': JSON.stringify(process.env.API_KEY)
   },
   server: {
     host: true,
