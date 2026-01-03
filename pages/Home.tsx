@@ -2,6 +2,41 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
+const OptimizedImage: React.FC<{
+  src: string;
+  alt: string;
+  className?: string;
+  width?: number;
+}> = ({ src, alt, className = "", width = 1200 }) => {
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  
+  const optimizedSrc = `${src.split('?')[0]}?auto=format&fit=crop&q=80&w=${width}`;
+
+  return (
+    <div className={`relative overflow-hidden bg-stone-200 ${className}`}>
+      {!isLoaded && !hasError && (
+        <div className="absolute inset-0 bg-gradient-to-r from-stone-200 via-stone-100 to-stone-200 animate-pulse" />
+      )}
+      {hasError ? (
+        <div className="absolute inset-0 flex items-center justify-center bg-stone-100 text-stone-300">
+          <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+        </div>
+      ) : (
+        <img
+          src={optimizedSrc}
+          alt={alt}
+          onLoad={() => setIsLoaded(true)}
+          onError={() => setHasError(true)}
+          className={`w-full h-full object-cover transition-opacity duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+        />
+      )}
+    </div>
+  );
+};
+
 const FAQItem: React.FC<{ question: string; answer: string }> = ({ question, answer }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -58,10 +93,11 @@ const Home: React.FC = () => {
       {/* Hero Section */}
       <section className="relative h-[85vh] flex items-center overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <img 
-            src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&q=80&w=2000" 
+          <OptimizedImage 
+            src="https://images.unsplash.com/photo-1500382017468-9049fed747ef" 
             alt="Lush green farm field" 
-            className="w-full h-full object-cover brightness-[0.7]"
+            className="w-full h-full brightness-[0.7]"
+            width={2000}
           />
           <div className="absolute inset-0 bg-gradient-to-r from-emerald-900/60 to-transparent"></div>
         </div>
@@ -185,11 +221,12 @@ const Home: React.FC = () => {
                 View Full Product Range &rarr;
               </Link>
             </div>
-            <div className="relative">
-              <img 
-                src="https://images.unsplash.com/photo-1592982537447-6f2a6a0c3c1b?auto=format&fit=crop&q=80&w=1000" 
+            <div className="relative aspect-square">
+              <OptimizedImage 
+                src="https://images.unsplash.com/photo-1592982537447-6f2a6a0c3c1b" 
                 alt="Irrigation system closeup" 
-                className="rounded-3xl shadow-2xl relative z-10"
+                className="w-full h-full rounded-3xl shadow-2xl relative z-10"
+                width={1000}
               />
               <div className="absolute -top-10 -right-10 w-64 h-64 bg-emerald-600/20 rounded-full blur-3xl z-0"></div>
               <div className="absolute -bottom-10 -left-10 w-64 h-64 bg-amber-600/10 rounded-full blur-3xl z-0"></div>

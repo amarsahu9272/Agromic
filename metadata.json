@@ -1,8 +1,5 @@
 {
   "name": "Agromic Industry Pvt Ltd",
   "description": "A modern web application for Agromic Industry Pvt Ltd, focusing on water-efficient farming solutions like mini sprinklers and drip irrigation systems.",
-  "requestFramePermissions": [
-    "camera",
-    "microphone"
-  ]
+  "requestFramePermissions": []
 }
