@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 
 /**
@@ -67,6 +67,43 @@ const ProductGallery: React.FC<ProductGalleryProps> = ({ images, name, technical
   
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const nextImage = useCallback(() => {
+    setCurrentIndex((prev) => (prev + 1) % images.length);
+  }, [images.length]);
+
+  const prevImage = useCallback(() => {
+    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
+  }, [images.length]);
+
+  const closeZoom = useCallback(() => {
+    setIsZoomed(false);
+  }, []);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Only navigate if the component is visible or the modal is open
+      if (!isVisible && !isZoomed) return;
+
+      switch (e.key) {
+        case 'ArrowRight':
+          nextImage();
+          break;
+        case 'ArrowLeft':
+          prevImage();
+          break;
+        case 'Escape':
+          closeZoom();
+          break;
+        default:
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [nextImage, prevImage, closeZoom, isVisible, isZoomed]);
+
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => {
       setIsVisible(entry.isIntersecting);
@@ -105,10 +142,18 @@ const ProductGallery: React.FC<ProductGalleryProps> = ({ images, name, technical
         
         {/* Navigation Arrows */}
         <div className="absolute inset-x-6 top-1/2 -translate-y-1/2 flex justify-between z-40 opacity-0 group-hover/gallery:opacity-100 transition-all pointer-events-none">
-           <button onClick={(e) => { e.stopPropagation(); setCurrentIndex(p => (p - 1 + images.length) % images.length); }} className="bg-white/95 backdrop-blur-md text-emerald-900 p-4 rounded-full hover:bg-emerald-600 hover:text-white transition-all pointer-events-auto shadow-2xl">
+           <button 
+             onClick={(e) => { e.stopPropagation(); prevImage(); }} 
+             aria-label="Previous image"
+             className="bg-white/95 backdrop-blur-md text-emerald-900 p-4 rounded-full hover:bg-emerald-600 hover:text-white transition-all pointer-events-auto shadow-2xl focus:ring-2 focus:ring-emerald-500 outline-none"
+           >
              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M15 19l-7-7 7-7" /></svg>
            </button>
-           <button onClick={(e) => { e.stopPropagation(); setCurrentIndex(p => (p + 1) % images.length); }} className="bg-white/95 backdrop-blur-md text-emerald-900 p-4 rounded-full hover:bg-emerald-600 hover:text-white transition-all pointer-events-auto shadow-2xl">
+           <button 
+             onClick={(e) => { e.stopPropagation(); nextImage(); }} 
+             aria-label="Next image"
+             className="bg-white/95 backdrop-blur-md text-emerald-900 p-4 rounded-full hover:bg-emerald-600 hover:text-white transition-all pointer-events-auto shadow-2xl focus:ring-2 focus:ring-emerald-500 outline-none"
+           >
              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7" /></svg>
            </button>
         </div>
@@ -125,7 +170,12 @@ const ProductGallery: React.FC<ProductGalleryProps> = ({ images, name, technical
       {/* Thumbnails */}
       <div className="bg-white p-4 flex justify-center space-x-3 border-t border-stone-200 overflow-x-auto no-scrollbar rounded-b-[2.5rem] lg:rounded-br-none lg:rounded-bl-[2.5rem]">
         {images.map((img, idx) => (
-          <button key={`${img}-thumb-${idx}`} onClick={() => setCurrentIndex(idx)} className={`w-14 h-14 rounded-2xl overflow-hidden flex-shrink-0 transition-all border-2 relative ${idx === currentIndex ? 'border-emerald-500 scale-110 shadow-md' : 'border-stone-100 opacity-50'}`}>
+          <button 
+            key={`${img}-thumb-${idx}`} 
+            onClick={() => setCurrentIndex(idx)} 
+            aria-label={`Go to image ${idx + 1}`}
+            className={`w-14 h-14 rounded-2xl overflow-hidden flex-shrink-0 transition-all border-2 relative outline-none focus:ring-2 focus:ring-emerald-500 ${idx === currentIndex ? 'border-emerald-500 scale-110 shadow-md' : 'border-stone-100 opacity-50'}`}
+          >
             <OptimizedImage src={img} alt="thumbnail" width={100} aspectRatio="aspect-square" />
           </button>
         ))}
@@ -133,11 +183,39 @@ const ProductGallery: React.FC<ProductGalleryProps> = ({ images, name, technical
 
       {/* Fullscreen Modal */}
       {isZoomed && (
-        <div className="fixed inset-0 z-[200] bg-black/98 backdrop-blur-3xl flex items-center justify-center p-4" onClick={() => setIsZoomed(false)}>
-          <div className="max-w-7xl w-full h-full flex items-center justify-center" onClick={e => e.stopPropagation()}>
+        <div 
+          className="fixed inset-0 z-[200] bg-black/98 backdrop-blur-3xl flex items-center justify-center p-4 cursor-zoom-out" 
+          onClick={closeZoom}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Image zoomed view"
+        >
+          <div className="max-w-7xl w-full h-full flex items-center justify-center relative" onClick={e => e.stopPropagation()}>
             <img src={getUnsplashUrl(images[currentIndex], 2000)} alt="zoom" className="max-w-full max-h-full rounded-[2.5rem] object-contain shadow-2xl" />
+            
+            {/* Modal Controls */}
+            <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-between px-4 pointer-events-none">
+              <button 
+                onClick={prevImage} 
+                aria-label="Previous image"
+                className="bg-white/10 hover:bg-white/20 text-white p-6 rounded-full transition-all pointer-events-auto backdrop-blur-md outline-none focus:ring-2 focus:ring-emerald-500"
+              >
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M15 19l-7-7 7-7" /></svg>
+              </button>
+              <button 
+                onClick={nextImage} 
+                aria-label="Next image"
+                className="bg-white/10 hover:bg-white/20 text-white p-6 rounded-full transition-all pointer-events-auto backdrop-blur-md outline-none focus:ring-2 focus:ring-emerald-500"
+              >
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7" /></svg>
+              </button>
+            </div>
           </div>
-          <button className="absolute top-8 right-8 text-white hover:text-emerald-400 transition-colors">
+          <button 
+            onClick={closeZoom}
+            aria-label="Close zoomed view"
+            className="absolute top-8 right-8 text-white/50 hover:text-emerald-400 transition-colors focus:ring-2 focus:ring-emerald-500 rounded-lg outline-none"
+          >
             <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>

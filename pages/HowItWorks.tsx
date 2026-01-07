@@ -36,6 +36,40 @@ const OptimizedImage: React.FC<{
   );
 };
 
+// Schematic Icon Components
+const FiltrationSchematic = () => (
+  <svg viewBox="0 0 100 100" className="w-16 h-16 text-emerald-600 mb-6 group-hover:scale-110 transition-transform duration-500">
+    <rect x="20" y="20" width="60" height="60" rx="4" fill="currentColor" fillOpacity="0.1" stroke="currentColor" strokeWidth="2" />
+    <path d="M20 40H80M20 60H80" stroke="currentColor" strokeWidth="1.5" strokeDasharray="4 2" />
+    <circle cx="50" cy="50" r="15" fill="none" stroke="currentColor" strokeWidth="2" />
+    <path d="M40 50L60 50M50 40L50 60" stroke="currentColor" strokeWidth="2" />
+    <circle cx="25" cy="30" r="2" fill="currentColor" className="animate-pulse" />
+    <circle cx="75" cy="70" r="2" fill="currentColor" className="animate-pulse" />
+  </svg>
+);
+
+const FertigationSchematic = () => (
+  <svg viewBox="0 0 100 100" className="w-16 h-16 text-emerald-600 mb-6 group-hover:scale-110 transition-transform duration-500">
+    <path d="M10 50H40M60 50H90" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+    <rect x="40" y="35" width="20" height="30" rx="2" fill="currentColor" fillOpacity="0.1" stroke="currentColor" strokeWidth="2" />
+    <path d="M50 20V35" stroke="currentColor" strokeWidth="2" />
+    <path d="M45 20H55" stroke="currentColor" strokeWidth="2" />
+    <circle cx="50" cy="50" r="4" fill="currentColor" className="animate-ping" />
+    <path d="M15 45L25 50L15 55" fill="none" stroke="currentColor" strokeWidth="2" />
+  </svg>
+);
+
+const RootZoneSchematic = () => (
+  <svg viewBox="0 0 100 100" className="w-16 h-16 text-emerald-600 mb-6 group-hover:scale-110 transition-transform duration-500">
+    <path d="M20 30H80" stroke="currentColor" strokeWidth="3" strokeDasharray="8 4" />
+    <path d="M50 30V60" stroke="currentColor" strokeWidth="2" />
+    <circle cx="50" cy="70" r="5" fill="currentColor" fillOpacity="0.2" />
+    <path d="M50 60C40 70 40 80 50 90C60 80 60 70 50 60Z" fill="currentColor" className="animate-bounce" />
+    <path d="M30 40C25 50 25 60 30 70" fill="none" stroke="currentColor" strokeWidth="1.5" strokeOpacity="0.3" />
+    <path d="M70 40C75 50 75 60 70 70" fill="none" stroke="currentColor" strokeWidth="1.5" strokeOpacity="0.3" />
+  </svg>
+);
+
 const HowItWorks: React.FC = () => {
   return (
     <div className="pb-24">
@@ -58,7 +92,6 @@ const HowItWorks: React.FC = () => {
           </div>
 
           <div className="relative group aspect-video rounded-[3rem] overflow-hidden shadow-2xl border border-stone-200">
-            {/* Featured Impact Image */}
             <OptimizedImage 
               src="https://images.unsplash.com/photo-1563514227147-6d2ff665a6a0" 
               alt="High precision irrigation technical view" 
@@ -66,7 +99,6 @@ const HowItWorks: React.FC = () => {
               width={2000}
             />
             
-            {/* Visual Callouts */}
             <div className="absolute inset-0 z-10 pointer-events-none">
               <div className="absolute top-[15%] left-10 md:left-20 animate-bounce">
                 <div className="bg-emerald-500/90 backdrop-blur-md text-white px-4 py-2 rounded-full text-[10px] font-bold shadow-xl border border-emerald-400 flex items-center">
@@ -104,21 +136,27 @@ const HowItWorks: React.FC = () => {
             {
               step: "01",
               title: "Smart Filtration",
-              desc: "Debris removal ensures zero-clog delivery, extending system lifespan and ensuring uniform water pressure across the entire grid."
+              desc: "Debris removal ensures zero-clog delivery, extending system lifespan and ensuring uniform water pressure across the entire grid.",
+              icon: <FiltrationSchematic />
             },
             {
               step: "02",
               title: "Venturi Fertigation",
-              desc: "Soluble fertilizers are precisely injected into the water stream, bypassing soil fixation and saving up to 80% on chemical costs."
+              desc: "Soluble fertilizers are precisely injected into the water stream, bypassing soil fixation and saving up to 80% on chemical costs.",
+              icon: <FertigationSchematic />
             },
             {
               step: "03",
               title: "Root-Zone Release",
-              desc: "Engineered emitters release moisture directly where it's needed, eliminating evaporation and inhibiting surface weed growth."
+              desc: "Engineered emitters release moisture directly where it's needed, eliminating evaporation and inhibiting surface weed growth.",
+              icon: <RootZoneSchematic />
             }
           ].map((item, i) => (
-            <div key={i} className="bg-white p-8 rounded-3xl border border-stone-100 shadow-sm relative group hover:border-emerald-500 transition-colors">
-              <div className="text-5xl font-serif font-bold text-emerald-100 mb-6 group-hover:text-emerald-500 transition-colors">{item.step}</div>
+            <div key={i} className="bg-white p-8 rounded-3xl border border-stone-100 shadow-sm relative group hover:border-emerald-500 transition-all hover:shadow-xl hover:-translate-y-1">
+              <div className="flex justify-between items-start">
+                {item.icon}
+                <div className="text-4xl font-serif font-bold text-stone-100 group-hover:text-emerald-100 transition-colors">{item.step}</div>
+              </div>
               <h3 className="text-xl font-bold mb-4 text-slate-900">{item.title}</h3>
               <p className="text-slate-600 leading-relaxed text-sm">{item.desc}</p>
             </div>
