@@ -1,5 +1,5 @@
 <div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/amarsahu9272/amar.ar/blob/main/AGROMIC%20LOGO.jpg?raw=true" />
+<img alt="Agromic" src="https://github.com/amarsahu9272/Agromic/blob/main/agromicLogo%20(3).png?raw=true" />
 </div>
 
 ## Run Locally
